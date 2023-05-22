@@ -2,10 +2,12 @@
 //
 
 #pragma once
+
+#include "stdafx.h"
 #include "afxcmn.h"
 
-#include <lmwksta.h>
-#include <lm.h>
+
+
 // CMyTestDlg dialog
 class CMyTestDlg : public CDialog
 {
@@ -33,8 +35,11 @@ protected:
 
 	int GetLoggedOnUsers();
 	int GetNumberLoggedOnUsers();
-	BOOL GetLoggedUserInfo( LPWKSTA_USER_INFO_1& pUserInfo);
+	BOOL GetLoggedUserInfo(LPWKSTA_USER_INFO_1& pUserInfo);
 	BOOL GetWorkStationInfo(LPWKSTA_INFO_102& pData);
+
+	char _computername_str[64], _langroup_str[64], _lanroot_str[64];
+
 	unsigned short usNumUserEntries;
 public:
     CListCtrl m_listCtrl;

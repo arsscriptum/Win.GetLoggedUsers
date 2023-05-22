@@ -97,7 +97,14 @@ BOOL CMyTestDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	usNumUserEntries = 0;
-	// Add "About..." menu item to system menu.
+	memset(_computername_str, 0, sizeof(_computername_str));
+	memset(_langroup_str, 0, sizeof(_langroup_str));
+	memset(_lanroot_str, 0, sizeof(_lanroot_str));
+
+
+	LPWKSTA_INFO_102 wData;
+	GetWorkStationInfo(wData);
+	//NetApiBufferFree(&wData);
 
 	// IDM_ABOUTBOX must be in the system command range.
 	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
@@ -264,11 +271,10 @@ int CMyTestDlg::GetLoggedOnUsers()
 					wcstombs(username_str, pTmpBuf->wkui0_username, lstrlenW(pTmpBuf->wkui0_username));
 
 					AddData(m_listCtrl, i, 0, username_str);
-					AddData(m_listCtrl, i, 1, "zbook");
-					AddData(m_listCtrl, i, 2, "server");
+					AddData(m_listCtrl, i, 1, _computername_str);
+					AddData(m_listCtrl, i, 2, _langroup_str);
 					usNumUserEntries++;
 			
-
 					// Print the user logged on to the workstation.
 					wprintf(L"\t-- %s\n", pTmpBuf->wkui0_username);
 \
@@ -317,18 +323,16 @@ BOOL CMyTestDlg::GetWorkStationInfo(LPWKSTA_INFO_102& pData)
 	char sMessage[1024];
 	memset(sMessage, 0, sizeof(sMessage));
 
-	char computer_name[64], langroup_str[64], lanroot_str[64];
-	memset(computer_name, 0, sizeof(computer_name));
-	memset(langroup_str, 0, sizeof(langroup_str));
-	memset(lanroot_str, 0, sizeof(lanroot_str));
-	wcstombs(computer_name, pData->wki102_computername, lstrlenW(pData->wki102_computername));
-	wcstombs(langroup_str, pData->wki102_langroup, lstrlenW(pData->wki102_langroup));
-	wcstombs(lanroot_str, pData->wki102_lanroot, lstrlenW(pData->wki102_lanroot));
+
+	memset(_computername_str, 0, sizeof(_computername_str));
+	memset(_langroup_str, 0, sizeof(_langroup_str));
+	memset(_lanroot_str, 0, sizeof(_lanroot_str));
+	wcstombs(_computername_str, pData->wki102_computername, lstrlenW(pData->wki102_computername));
+	wcstombs(_langroup_str, pData->wki102_langroup, lstrlenW(pData->wki102_langroup));
+	wcstombs(_lanroot_str, pData->wki102_lanroot, lstrlenW(pData->wki102_lanroot));
 
 	if (nStatus == NERR_Success)
 	{
-		sprintf(sMessage,"Platform: %d\nComputer: %s\nLan group: %s\nLan root: %s\nVersion:  %d.%d\n# Logged On Users: %d\n", pData->wki102_platform_id, computer_name,langroup_str,lanroot_str, pData->wki102_ver_major, pData->wki102_ver_minor, pData->wki102_logged_on_users);
-		MessageBox(sMessage);
 		return TRUE;
 	}
 
@@ -395,7 +399,7 @@ void CMyTestDlg::OnBnClickedRefresh()
 	AddData(m_listCtrl, index, 2, /*logonserver_str*/ "TEST SERVER");
 
 
-	NetApiBufferFree(&loggedUserInfo);
+	//NetApiBufferFree(&loggedUserInfo);
 }
 
 
@@ -410,5 +414,7 @@ void CMyTestDlg::OnBnClickedOptions()
 
 	LPWKSTA_INFO_102 wData;
 	GetWorkStationInfo(wData);
-	NetApiBufferFree(&wData);
+	sprintf(sMessage, "Platform: %d\nComputer: %s\nLan group: %s\nLan root: %s\nVersion:  %d.%d\n# Logged On Users: %d\n", wData->wki102_platform_id, _computername_str, _langroup_str, _lanroot_str, wData->wki102_ver_major, wData->wki102_ver_minor, wData->wki102_logged_on_users);
+	MessageBox(sMessage);
+	//NetApiBufferFree(&wData);
 }
